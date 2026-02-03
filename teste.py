@@ -1,4 +1,6 @@
+from models.database import Database
 from typing import Self
+
 
 class Tarefa:
     def __init__(self: Self, titulo_tarefa: str, date_conclusao: str = None) -> None:

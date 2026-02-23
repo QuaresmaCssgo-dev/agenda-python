@@ -1,8 +1,28 @@
 from sqlite3 import Connection, connect, Cursor
-from typing import Any
+from types import TracebackType
+from typing import Any, Self, Optional, Type
+from dotenv import load_dotenv
+import traceback
+import os
+
+load_dotenv() # Procura um arquivo .env com variáveis
+DB_PATH = os.getenv('DATABASE', './data/tarefas.sqlite3')
+
+def init_db(db_name: str = DB_PATH) -> None:
+    with connect(db_name) as conn:
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS tarefas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo_tarefa TEXT NOT NULL,
+            data_conclusao TEXT  
+        );
+        """)
 
 class Database:
-    def __init__(self, db_name: str) -> None:
+    """
+        Classe que gerencia conexões e operações com um banco de dados SQLite. Utiliza o protocolo de gerenciamento de contexto para garantir que a conexão seja encerrada corretamente.
+    """
+    def __init__(self, db_name: str = DB_PATH) -> None:
         self.connection: Connection = connect(db_name)
         self.cursor: Cursor = self.connection.cursor()
 
@@ -19,20 +39,22 @@ class Database:
         self.connection.close()
 
     # Métodos para o gerenciamento de contexto
-
     # Método de entrada no contexto
-    def __enter__(self):
-        print('Entrando no contexto...')
+    def __enter__(self) -> Self:
         return self
     
     # Método de saída do contexto
-    def __exit__(self, exc_type, exc_value, traceback):
-        print('Saindo no contexto...')
-        self.close()
+    def __exit__(
+            self, 
+            exc_type: Optional[Type[BaseException]], 
+            exc_value: Optional[BaseException], 
+            tb: Optional[TracebackType]) -> None:
+        
+        if exc_type is not None:
+            print('Exceção capturada no contexto:')
+            print(f'Tipo: {exc_type.__name__}')
+            print(f'Mensagem: {exc_value}')
+            print('Traceback completo:')
+            traceback.print_tb(tb)
 
-# try:
-#     db = Database('./data/tarefas.sqlite3')
-#     db.executar('''
-#     CREATE TABLE IF NOT EXISTS tarefas (
-#         id INTEGER PRIMARY KEY AUTOINCREMENT,
-#         titulo_tarefa TEXT NOT NULL,
+        self.close()

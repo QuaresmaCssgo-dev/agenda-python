@@ -1,0 +1,10 @@
+{
+    
+    "workbench.iconTheme": "material-icon-theme",
+    "editor.rulers": [
+        80, 
+        100,
+        120
+    ]
+
+}
